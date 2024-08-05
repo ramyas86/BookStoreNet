@@ -1,0 +1,43 @@
+.alphabet-filter {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.alphabet-letter {
+  margin: 5px;
+  padding: 2px;
+  border: none;
+  background-color: transparent;
+  color: #007bff;
+  font-size: 14px;  /* Adjust the font size as needed */
+  cursor: pointer;
+  transition: color 0.3s;
+  /* text-decoration: underline; */
+}
+
+.alphabet-letter:hover {
+  color: #0056b3;
+}
+
+.alphabet-letter.active {
+  font-weight: bold;
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.clear-button {
+  margin: 5px;
+  padding: 5px 10px;
+  border: none;
+  background: none;
+  color: #007bff;
+  /* text-decoration: underline; */
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.clear-button:hover {
+  color: #0056b3;
+}

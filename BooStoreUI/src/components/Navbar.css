@@ -1,0 +1,28 @@
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.8rem; /* Increased font size for branding */
+  color: #343a40; /* Dark color for brand */
+}
+
+.nav-link {
+  font-size: 1.2rem; /* Increased font size for links */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  color: #6c757d; /* Slightly muted color for links */
+}
+
+.nav-link:hover {
+  color: #007bff; /* Hover color for links */
+}
+
+.dropdown-menu {
+  min-width: 200px;
+}
+
+.navbar {
+  transition: background-color 0.3s ease;
+}
+
+.navbar:hover {
+  background-color: #f8f9fa; /* Light background color on hover */
+}
