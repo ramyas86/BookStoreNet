@@ -141,6 +141,14 @@ public class AuthorsController : ControllerBase
                 existingAuthor.ImagePath = path;
             }
 
+            if (updateAuthor.RemoveImage != null)
+            {
+                if ((bool)updateAuthor.RemoveImage)
+                {
+                    existingAuthor.ImagePath = null;
+                }
+            }
+
             existingAuthor.Name = updateAuthor.Name;
             existingAuthor.Biography = updateAuthor.Biography;
             // Update other properties as needed

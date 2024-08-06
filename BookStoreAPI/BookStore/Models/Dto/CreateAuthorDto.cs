@@ -16,6 +16,8 @@ public class CreateAuthorDto
 
     public IFormFile? AuthorImage { get; set; }
 
+    public Boolean? RemoveImage { get; set; }
+
     [JsonIgnore]
     public ICollection<Book>? Books { get; set; }
 }

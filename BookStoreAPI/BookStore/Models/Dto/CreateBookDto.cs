@@ -26,6 +26,8 @@ public class CreateBookDto
 
     public IFormFile? BookImage { get; set; }
 
+    public Boolean? RemoveImage { get; set; }
+
     public Author? Author { get; set; }
 
     public Genre? Genre { get; set; }

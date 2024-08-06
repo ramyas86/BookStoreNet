@@ -123,7 +123,13 @@ public class BooksController : ControllerBase
         existingBook.PublicationDate = updateBookDto.PublicationDate;
         existingBook.ImagePath ??= path;
         existingBook.AuthorId = updateBookDto.AuthorId;
-        // Update other properties as needed
+        if(updateBookDto.RemoveImage != null)
+        {
+            if ((bool)updateBookDto.RemoveImage)
+            {
+                existingBook.ImagePath = null;
+            }
+        }
 
         _context.Books.Update(existingBook);
         await _context.SaveChangesAsync();

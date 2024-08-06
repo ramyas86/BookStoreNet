@@ -50,7 +50,7 @@ function BooksPage() {
   const handleConfirmDelete = async () => {
     try {
       await deleteBook(bookToDelete);
-      setBooks(books.filter(book => book.book_id !== bookToDelete));
+      setBooks(books.filter(book => book.bookId !== bookToDelete));
       toast.success('Book deleted successfully!');
       setShowDeleteModal(false);
       setBookToDelete(null);
@@ -123,7 +123,7 @@ function BooksPage() {
         {!loading && currentBooks.length > 0 && (
           <div className="row row-cols-1 row-cols-md-3 g-4">
             {currentBooks.map((book) => (
-              <div key={book.book_id} className="col mb-3">
+              <div key={book.bookId} className="col mb-3">
                 <div className="card" style={{height: '100% !important'}}>
                   <div className="row g-0 h-100">
                     <div className="col-md-4 d-flex align-items-center">

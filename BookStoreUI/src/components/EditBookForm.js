@@ -12,7 +12,7 @@ const EditBookForm = ({ book, onClose }) => {
     authorId: book.authorId,
     genreId: book.genreId,
     price: book.price,
-    publicationDate: book.publicationDate,
+    publicationDate: new Date(book.publicationDate).toISOString().split('T')[0],
     bookImage: book.imagePath,
   });
   const [authors, setAuthors] = useState([]);
@@ -44,7 +44,7 @@ const EditBookForm = ({ book, onClose }) => {
     fetchAuthors();
     fetchGenres();
   }, []);
-
+console.log(formData);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevFormData => ({
@@ -86,12 +86,12 @@ const EditBookForm = ({ book, onClose }) => {
     if (imageFile) {
       formDataToSend.append('bookImage', imageFile);
     } else if (removeImage) {
-      formDataToSend.append('remove_image', 'true'); // Add a flag to indicate image removal
+      formDataToSend.append('removeImage', 'true'); // Add a flag to indicate image removal
     }
     console.log(updatedBookData);
 
     try {
-      await updateBook(book.book_id, formDataToSend);
+      await updateBook(book.bookId, formDataToSend);
       toast.success('Book updated successfully!');
       onClose(); // Close the offcanvas
     } catch (error) {

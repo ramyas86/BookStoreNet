@@ -57,7 +57,7 @@ const EditAuthorForm = ({ author, onClose }) => {
     if (imageFile) {
       formDataToSend.append('authorImage', imageFile);
     } else if (removeImage) {
-      formDataToSend.append('remove_image', 'true'); // Add a flag to indicate image removal
+      formDataToSend.append('removeImage', 'true'); // Add a flag to indicate image removal
     }
 
     try {
