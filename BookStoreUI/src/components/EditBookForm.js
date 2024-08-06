@@ -5,6 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const EditBookForm = ({ book, onClose }) => {
   const [formData, setFormData] = useState({
@@ -19,8 +21,10 @@ const EditBookForm = ({ book, onClose }) => {
   const [genres, setGenres] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(book.imagePath ? book.imagePath : null);
-  const [removeImage, setRemoveImage] = useState(false); // State to track if image should be removed
+  const [removeImage, setRemoveImage] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const [publicationDate, setPublicationDate] = useState(book.publicationDate);
 
   useEffect(() => {
     const fetchAuthors = async () => {
@@ -44,7 +48,7 @@ const EditBookForm = ({ book, onClose }) => {
     fetchAuthors();
     fetchGenres();
   }, []);
-console.log(formData);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevFormData => ({
@@ -60,21 +64,44 @@ console.log(formData);
   };
 
   const handleRemoveImage = () => {
-    setImageFile(null); // Clear the image file
-    setImagePreview(null); // Clear the image preview
-    setRemoveImage(true); // Set removeImage flag to true
+    setImageFile(null);
+    setImagePreview(null);
+    setRemoveImage(true);
   };
 
   const handleCancel = () => {
     navigate('/books');
-    onClose(); // Close the offcanvas if cancel is clicked
+    onClose();
+  };
+
+  const validateFields = () => {
+    const errors = {};
+    const { title, authorId, genreId, price, publicationDate } = formData;
+
+    if (!title.trim()) errors.title = "Title is required";
+    if (!authorId) errors.authorId = "Author is required";
+    if (!genreId) errors.genreId = "Genre is required";
+    if (!price.trim()) {
+      errors.price = "Price is required";
+    } else if (isNaN(price) || Number(price) <= 0) {
+      errors.price = "Price must be a positive number";
+    }
+    if (!publicationDate) errors.publicationDate = "Publication Date is required";
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateFields()) {
+      return;
+    }
+
     const updatedBookData = {
       ...formData,
-      publicationDate: new Date(formData.publicationDate).toISOString().split('T')[0],
+      publicationDate: new Date(publicationDate).toISOString().split('T')[0],
       authorId: formData.authorId,
       genreId: formData.genreId,
     };
@@ -86,14 +113,13 @@ console.log(formData);
     if (imageFile) {
       formDataToSend.append('bookImage', imageFile);
     } else if (removeImage) {
-      formDataToSend.append('removeImage', 'true'); // Add a flag to indicate image removal
+      formDataToSend.append('removeImage', 'true');
     }
-    console.log(updatedBookData);
 
     try {
       await updateBook(book.bookId, formDataToSend);
       toast.success('Book updated successfully!');
-      onClose(); // Close the offcanvas
+      onClose();
     } catch (error) {
       console.error('Error updating book:', error);
       toast.error('Error updating book. Please try again.');
@@ -112,8 +138,9 @@ console.log(formData);
             name="title"
             value={formData.title}
             onChange={handleChange}
-            required
+            //required
           />
+          {errors.title && <div className="text-danger">{errors.title}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="authorId" className="form-label">Author</label>
@@ -123,7 +150,7 @@ console.log(formData);
             name="authorId"
             value={formData.authorId}
             onChange={handleChange}
-            required
+            //required
           >
             <option value="">Select Author</option>
             {authors.map(author => (
@@ -132,6 +159,7 @@ console.log(formData);
               </option>
             ))}
           </select>
+          {errors.authorId && <div className="text-danger">{errors.authorId}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="genreId" className="form-label">Genre</label>
@@ -141,7 +169,7 @@ console.log(formData);
             name="genreId"
             value={formData.genreId}
             onChange={handleChange}
-            required
+            //required
           >
             <option value="">Select Genre</option>
             {genres.map(genre => (
@@ -150,6 +178,7 @@ console.log(formData);
               </option>
             ))}
           </select>
+          {errors.genreId && <div className="text-danger">{errors.genreId}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="price" className="form-label">Price</label>
@@ -160,20 +189,23 @@ console.log(formData);
             name="price"
             value={formData.price}
             onChange={handleChange}
-            required
+            //required
           />
+          {errors.price && <div className="text-danger">{errors.price}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="publicationDate" className="form-label">Publication Date</label>
-          <input
-            type="date"
-            className="form-control"
-            id="publicationDate"
-            name="publicationDate"
-            value={formData.publicationDate}
-            onChange={handleChange}
-            required
-          />
+          <div className="customDatePickerWidth">
+            <DatePicker
+              selected={publicationDate}
+              onChange={(date) => setPublicationDate(date)}
+              className="form-control datepicker"
+              id="publicationDate"
+              dateFormat="yyyy-MM-dd"
+              //required
+            />
+          </div>
+          {errors.publicationDate && <div className="text-danger">{errors.publicationDate}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="bookImage" className="form-label">Book Image</label>
@@ -189,7 +221,7 @@ console.log(formData);
             <div className="mt-3">
               <img src={imagePreview} alt="Book Preview" style={{ maxWidth: '100%' }} />
               <button type="button" className="btn btn-danger mt-2" onClick={handleRemoveImage}>
-              <FontAwesomeIcon icon={faTrash} className="me-2" />
+                <FontAwesomeIcon icon={faTrash} className="me-2" />
                 Remove Image
               </button>
             </div>
@@ -198,13 +230,13 @@ console.log(formData);
         <div className="row justify-content-center mt-4">
           <div className="col-auto">
             <button type="submit" className="btn btn-primary">
-            <FontAwesomeIcon icon={faSave} className="me-2" />
+              <FontAwesomeIcon icon={faSave} className="me-2" />
               Save Changes
             </button>
           </div>
           <div className="col-auto">
             <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-            <FontAwesomeIcon icon={faTimes} className="me-2" />
+              <FontAwesomeIcon icon={faTimes} className="me-2" />
               Cancel
             </button>
           </div>

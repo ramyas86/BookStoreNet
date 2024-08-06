@@ -10,6 +10,8 @@ import add_image from './images/addBook.jpg';
 import CustomNavbar from './Navbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook } from '@fortawesome/free-solid-svg-icons';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const AddBookForm = () => {
   const [authors, setAuthors] = useState([]);
@@ -18,10 +20,11 @@ const AddBookForm = () => {
   const [authorId, setAuthorId] = useState('');
   const [genreId, setGenreId] = useState('');
   const [price, setPrice] = useState('');
-  const [publicationDate, setPublicationDate] = useState('');
+  const [publicationDate, setPublicationDate] = useState(null);
   const [newGenre, setNewGenre] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const handleAddGenre = async (e) => {
@@ -29,9 +32,10 @@ const AddBookForm = () => {
     if (newGenre.trim()) {
       try {
         await addGenre({ genreName: newGenre });
-        toast.success('Genre added successfully!')
+        toast.success('Genre added successfully!');
         const genresData = await getGenres();
         setGenres(genresData.data);
+        setNewGenre(''); // Clear the new genre input
       } catch (error) {
         console.error('Error adding genre', error);
         toast.error('Error adding genre. Please try again.');
@@ -60,18 +64,40 @@ const AddBookForm = () => {
     setImagePreview(URL.createObjectURL(file));
   };
 
+  const validateFields = () => {
+    const errors = {};
+
+    if (!title.trim()) errors.title = "Title is required";
+    if (!authorId) errors.authorId = "Author is required";
+    if (!genreId) errors.genreId = "Genre is required";
+    if (!price.trim()) {
+      errors.price = "Price is required";
+    } else if (isNaN(price) || Number(price) <= 0) {
+      errors.price = "Price must be a positive number";
+    }
+    if (!publicationDate) errors.publicationDate = "Publication Date is required";
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateFields()) {
+      alert('error message');
+      return;
+    }
+
     try {
-      await addBook({ title, authorId: authorId, genreId: genreId, price, publicationDate: publicationDate, bookImage:(imageFile ? imageFile : "") });
+      await addBook({ title, authorId, genreId, price, publicationDate, bookImage: imageFile ? imageFile : "" });
       navigate("/books");
       toast.success('Book added successfully!');
       setTitle('');
       setAuthorId('');
       setGenreId('');
       setPrice('');
-      setPublicationDate('');
+      setPublicationDate(null);
       setImageFile(null);
       setImagePreview(null);
     } catch (error) {
@@ -88,13 +114,13 @@ const AddBookForm = () => {
     <>
       <CustomNavbar />
       <div className="container add-book-container">
-      <h2 style={{ textAlign: 'center', margin: '20px 0', fontWeight: 'bold', color: '#333' }}>Add New Book</h2>
+        <h2 style={{ textAlign: 'center', margin: '20px 0', fontWeight: 'bold', color: '#333' }}>Add New Book</h2>
 
         <div className="row">
           <div className="col-md-6 mt-4">
             <img src={add_image} alt="Add a Book" className="img-fluid imgcss" />
           </div>
-          <div className="col-md-6" style={{marginTop: '20px'}}>
+          <div className="col-md-6" style={{ marginTop: '20px' }}>
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="title" className="form-label">Title</label>
@@ -105,8 +131,9 @@ const AddBookForm = () => {
                   placeholder='Add title of the book'
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  required
+                  // required
                 />
+                {errors.title && <div className="text-danger">{errors.title}</div>}
               </div>
               <div className="mb-3">
                 <label htmlFor="authorName" className="form-label">Author Name</label>
@@ -115,7 +142,7 @@ const AddBookForm = () => {
                   id="author"
                   value={authorId}
                   onChange={(e) => setAuthorId(e.target.value)}
-                  required
+                  // required
                 >
                   <option value="">Select Author</option>
                   {authors.map((author) => (
@@ -124,6 +151,7 @@ const AddBookForm = () => {
                     </option>
                   ))}
                 </select>
+                {errors.authorId && <div className="text-danger">{errors.authorId}</div>}
               </div>
               <div className="mb-3">
                 <label htmlFor="genreName" className="form-label">Genre Name</label>
@@ -132,7 +160,7 @@ const AddBookForm = () => {
                   id="genre"
                   value={genreId}
                   onChange={(e) => setGenreId(e.target.value)}
-                  required
+                  // required
                 >
                   <option value="">Select Genre</option>
                   {genres.map((genre) => (
@@ -141,7 +169,8 @@ const AddBookForm = () => {
                     </option>
                   ))}
                 </select>
-                <div className="input-group my-3" style={{ width: "350px" }}>
+                {errors.genreId && <div className="text-danger">{errors.genreId}</div>}
+                <div className="input-group my-3" style={{ width: "350px"}}>
                   <input
                     className="form-control"
                     type="text"
@@ -151,6 +180,7 @@ const AddBookForm = () => {
                   />
                   <button
                     className="btn btn-secondary"
+                    style={{zIndex: "1"}}
                     type="button"
                     onClick={handleAddGenre}
                   >
@@ -167,19 +197,23 @@ const AddBookForm = () => {
                   placeholder='Price of the book'
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  required
+                  // required
                 />
+                {errors.price && <div className="text-danger">{errors.price}</div>}
               </div>
               <div className="mb-3">
                 <label htmlFor="publicationDate" className="form-label">Publication Date</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  id="publicationDate"
-                  value={publicationDate}
-                  onChange={(e) => setPublicationDate(e.target.value)}
-                  required
-                />
+                <div className="customDatePickerWidth">
+                  <DatePicker
+                    selected={publicationDate}
+                    onChange={(date) => setPublicationDate(date)}
+                    className="form-control datepicker"
+                    id="publicationDate"
+                    dateFormat="yyyy-MM-dd"
+                    // required
+                  />
+                </div>
+                {errors.publicationDate && <div className="text-danger">{errors.publicationDate}</div>}
               </div>
               <div className="mb-3">
                 <label htmlFor="bookImage" className="form-label">Book Image</label>

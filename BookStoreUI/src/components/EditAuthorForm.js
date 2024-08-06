@@ -14,8 +14,27 @@ const EditAuthorForm = ({ author, onClose }) => {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(author.imagePath ? author.imagePath : null);
-  const [removeImage, setRemoveImage] = useState(false); // State to track if image should be removed
+  const [removeImage, setRemoveImage] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setFormData({
+      name: author.name,
+      bio: author.biography,
+      authorImage: author.imagePath,
+    });
+    setImagePreview(author.imagePath ? author.imagePath : null);
+  }, [author]);
+
+  const validateFields = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = "Name is required";
+    if (formData.bio.trim().length < 10) errors.bio = "Bio is required and must be at least 10 characters long";
+    
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,9 +51,9 @@ const EditAuthorForm = ({ author, onClose }) => {
   };
 
   const handleRemoveImage = () => {
-    setImageFile(null); // Clear the image file
-    setImagePreview(null); // Clear the image preview
-    setRemoveImage(true); // Set removeImage flag to true
+    setImageFile(null);
+    setImagePreview(null);
+    setRemoveImage(true);
   };
 
   const handleCancel = () => {
@@ -44,6 +63,11 @@ const EditAuthorForm = ({ author, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateFields()) {
+      return;
+    }
+
     const updatedAuthorData = {
       ...formData,
       biography: formData.bio
@@ -53,11 +77,11 @@ const EditAuthorForm = ({ author, onClose }) => {
     for (let key in updatedAuthorData) {
       formDataToSend.append(key, updatedAuthorData[key]);
     }
-    console.log(imageFile);
+
     if (imageFile) {
       formDataToSend.append('authorImage', imageFile);
     } else if (removeImage) {
-      formDataToSend.append('removeImage', 'true'); // Add a flag to indicate image removal
+      formDataToSend.append('removeImage', 'true');
     }
 
     try {
@@ -82,8 +106,9 @@ const EditAuthorForm = ({ author, onClose }) => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            required
+            // required
           />
+          {errors.name && <div className="text-danger">{errors.name}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="bio" className="form-label">Bio</label>
@@ -93,8 +118,9 @@ const EditAuthorForm = ({ author, onClose }) => {
             name="bio"
             value={formData.bio}
             onChange={handleChange}
-            required
+            // required
           ></textarea>
+          {errors.bio && <div className="text-danger">{errors.bio}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="authorImage" className="form-label">Author Image</label>
@@ -110,7 +136,7 @@ const EditAuthorForm = ({ author, onClose }) => {
             <div className="mt-3">
               <img src={imagePreview} alt="Author Preview" style={{ maxWidth: '100%' }} />
               <button type="button" className="btn btn-danger mt-2" onClick={handleRemoveImage}>
-              <FontAwesomeIcon icon={faTrash} className="me-2" />
+                <FontAwesomeIcon icon={faTrash} className="me-2" />
                 Remove Image
               </button>
             </div>
@@ -119,13 +145,13 @@ const EditAuthorForm = ({ author, onClose }) => {
         <div className="row justify-content-center mt-4">
           <div className="col-auto">
             <button type="submit" className="btn btn-primary">
-            <FontAwesomeIcon icon={faSave} className="me-2" />
+              <FontAwesomeIcon icon={faSave} className="me-2" />
               Save Changes
             </button>
           </div>
           <div className="col-auto">
             <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-            <FontAwesomeIcon icon={faTimes} className="me-2" />
+              <FontAwesomeIcon icon={faTimes} className="me-2" />
               Cancel
             </button>
           </div>
